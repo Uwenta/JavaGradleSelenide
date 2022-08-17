@@ -17,8 +17,8 @@ public class CardDeliveryTest {
 
     @BeforeEach
     void SetUp() {
-        Configuration.holdBrowserOpen = true;
-        //Configuration.headless = true;
+        //Configuration.holdBrowserOpen = true;
+        Configuration.headless = true;
         open("http://localhost:9999/");
     }
 
@@ -52,9 +52,7 @@ public class CardDeliveryTest {
         int month = date.getMonthValue();
 
         $("input[placeholder='Город']").setValue("Екатеринбург");
-
         $(".calendar-input__custom-control").click();
-
         if (month == monthToday && year == yearToday) {
             $x("//td[contains(text(), '" + days + "')]").click();
         } else {
@@ -76,7 +74,7 @@ public class CardDeliveryTest {
         String strDate = date.format(DateTimeFormatter.ofPattern("dd.MM.uuuu"));
 
         $("input[placeholder='Город']").setValue("ка");
-        $x("//*[(text()='Казань')]").click();
+        $x("//span[(text()='Казань')]").click();
 
         $("input[placeholder='Дата встречи']").sendKeys(Keys.CONTROL + "a");
         $("input[placeholder='Дата встречи']").sendKeys(Keys.DELETE);
