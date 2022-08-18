@@ -1,5 +1,6 @@
 package ru.netology;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,21 +18,21 @@ public class CardDeliveryTest {
 
     @BeforeEach
     void SetUp() {
-        //Configuration.holdBrowserOpen = true;
-        Configuration.headless = true;
+        //Configuration.headless = true;
         open("http://localhost:9999/");
     }
 
     LocalDate today = LocalDate.now();
-    int monthToday = today.getMonthValue();
-    int yearToday = today.getYear();
+
+
+    public String generateDate(int days) {
+        return today.plusDays(days).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
 
 
     @Test
     void shouldSubmitTheForm() {
-
-        LocalDate date = today.plusDays(5);
-        String strDate = date.format(DateTimeFormatter.ofPattern("dd.MM.uuuu"));
+        String strDate = generateDate(5);
 
         $("input[placeholder='Город']").setValue("Екатеринбург");
         $("input[placeholder='Дата встречи']").sendKeys(Keys.CONTROL + "a");
@@ -42,6 +43,9 @@ public class CardDeliveryTest {
         $("label[data-test-id='agreement']").click();
         $x("//span[contains(text(),'Забронировать')]//ancestor::button").click();
         $x("//*[contains(text(),'Успешно')]").shouldBe(visible, Duration.ofSeconds(15));
+        $(".notification__content")
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + strDate), Duration.ofSeconds(15))
+                .shouldBe(visible);
     }
 
     @Test
@@ -50,10 +54,12 @@ public class CardDeliveryTest {
         int days = date.getDayOfMonth();
         int year = date.getYear();
         int month = date.getMonthValue();
+        String strDate = generateDate(7);
 
-        $("input[placeholder='Город']").setValue("Екатеринбург");
+        $("input[placeholder='Город']").setValue("ка");
+        $x("//span[(text()='Казань')]").click();
         $(".calendar-input__custom-control").click();
-        if (month == monthToday && year == yearToday) {
+        if (month == today.getMonthValue() && year == today.getYear()) {
             $x("//td[contains(text(), '" + days + "')]").click();
         } else {
             $(".calendar__arrow_direction_right[data-step='1']").click();
@@ -65,28 +71,10 @@ public class CardDeliveryTest {
         $("label[data-test-id='agreement']").click();
         $x("//span[contains(text(),'Забронировать')]//ancestor::button").click();
         $x("//*[contains(text(),'Успешно')]").shouldBe(visible, Duration.ofSeconds(15));
+        $(".notification__content")
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + strDate), Duration.ofSeconds(15))
+                .shouldBe(visible);
 
     }
-
-    @Test
-    void shouldSubmitTheFormWithChoiceYekaterinburg() {
-        LocalDate date = today.plusDays(10);
-        String strDate = date.format(DateTimeFormatter.ofPattern("dd.MM.uuuu"));
-
-        $("input[placeholder='Город']").setValue("ка");
-        $x("//span[(text()='Казань')]").click();
-
-        $("input[placeholder='Дата встречи']").sendKeys(Keys.CONTROL + "a");
-        $("input[placeholder='Дата встречи']").sendKeys(Keys.DELETE);
-        $("input[placeholder='Дата встречи']").setValue(strDate);
-
-        $("input[name='name']").setValue("Слава Чебурашкин");
-        $("input[name='phone']").setValue("+79999999999");
-        $("label[data-test-id='agreement']").click();
-        $x("//span[contains(text(),'Забронировать')]//ancestor::button").click();
-        $x("//*[contains(text(),'Успешно')]").shouldBe(visible, Duration.ofSeconds(15));
-
-    }
-
 
 }
